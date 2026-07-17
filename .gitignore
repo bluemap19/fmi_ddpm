@@ -2,3 +2,9 @@ ddpm_env/
 .idea/
 .vscode/
 *.egg-info/
+/ddpm_logs/
+/scripts/cifar_test/
+/scripts/cifar_train/
+/scripts/wandb/
+scripts/cifar_train/cifar-10-python.tar.gz
+scripts/cifar_train/cifar-10-python.tar.gz

@@ -63,6 +63,34 @@ def main():
     # -------------------------------------------------------------------------
     # create_argparser() 返回一个配置好的 argparse.ArgumentParser 对象，
     # .parse_args() 解析 sys.argv 中的命令行参数，返回 Namespace 对象
+    # activation = {str} 'silu'
+    # attention_resolutions = {tuple: 1} (1,)
+    # base_channels = {int} 128
+    # batch_size = {int} 128
+    # channel_mults = {tuple: 4} (1, 2, 2, 2)
+    # checkpoint_rate = {int} 1000
+    # device = {device} device(type='cpu')
+    # dropout = {float} 0.1
+    # ema_decay = {float} 0.9999
+    # ema_update_rate = {int} 1
+    # iterations = {int} 800000
+    # learning_rate = {float} 0.0002
+    # log_dir = {str} 'D:\\GitHub\\fmi_ddpm\\ddpm_logs'
+    # log_rate = {int} 1000
+    # log_to_wandb = {bool} True
+    # loss_type = {str} 'l2'
+    # model_checkpoint = {NoneType} None
+    # norm = {str} 'gn'
+    # num_res_blocks = {int} 2
+    # num_timesteps = {int} 1000
+    # optim_checkpoint = {NoneType} None
+    # project_name = {str} 'DDPM_CIFAR_TEST'
+    # run_name = {str} 'ddpm-2026-07-17-18-18'
+    # schedule = {str} 'linear'
+    # schedule_high = {float} 0.02
+    # schedule_low = {float} 0.0001
+    # time_emb_dim = {int} 512
+    # use_labels = {bool} False
     args = create_argparser().parse_args()
 
     # 确定计算设备：优先使用 GPU (CUDA)，如果没有可用 GPU 则回退到 CPU
@@ -235,7 +263,6 @@ def main():
             optimizer.zero_grad()
 
             # loss.backward(): 从 loss 标量开始，通过计算图反向传播计算每个参数的梯度
-            # 对于扩散模型，梯度主要流向 UNet 的所有卷积层、注意力层、归一化层等
             loss.backward()
 
             # optimizer.step(): 根据计算出的梯度更新模型参数
@@ -422,7 +449,8 @@ def create_argparser():
     # torch.cuda.is_available() 检查是否有可用的 NVIDIA GPU 和正确安装的 CUDA
     # 如果有，使用 "cuda" 设备（GPU）；否则回退到 "cpu"
     # GPU 训练通常比 CPU 快 10-100 倍（取决于 GPU 型号）
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    # device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    device = torch.device("cpu")
 
     # -------------------------------------------------------------------------
     # 生成运行名称（Run Name）

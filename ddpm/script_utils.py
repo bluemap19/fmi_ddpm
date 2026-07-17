@@ -2,8 +2,8 @@ import argparse
 import torchvision
 import torch.nn.functional as F
 
-from .unet import UNet
-from .diffusion import (
+from ddpm.unet import  UNet
+from ddpm.diffusion import (
     GaussianDiffusion,
     generate_linear_schedule,
     generate_cosine_schedule,
@@ -18,16 +18,24 @@ def cycle(dl):
         for data in dl:
             yield data
 
-def get_transform():
-    class RescaleChannels(object):
-        def __call__(self, sample):
-            return 2 * sample - 1
+# def get_transform():
+#     class RescaleChannels(object):
+#         def __call__(self, sample):
+#             return 2 * sample - 1
+#
+#     return torchvision.transforms.Compose([
+#         torchvision.transforms.ToTensor(),
+#         RescaleChannels(),
+#     ])
+class RescaleChannels:
+    def __call__(self, pic):
+        return pic * 2 - 1
 
+def get_transform():
     return torchvision.transforms.Compose([
         torchvision.transforms.ToTensor(),
         RescaleChannels(),
     ])
-
 
 def str2bool(v):
     """
@@ -61,7 +69,7 @@ def diffusion_defaults():
         num_timesteps=1000,
         schedule="linear",
         loss_type="l2",
-        use_labels=False,
+        use_labels=True,
 
         base_channels=128,
         channel_mults=(1, 2, 2, 2),
