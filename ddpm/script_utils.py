@@ -37,6 +37,26 @@ def get_transform():
         RescaleChannels(),
     ])
 
+
+"""MNIST专用的数据变换，转换为3通道32x32"""
+class To3Channels:
+    def __call__(self, x):
+        # x的形状是(1, 32, 32)，转换为(3, 32, 32)
+        return x.expand(3, -1, -1)
+
+# 在 script_utils.py 中添加
+def get_transform_mnist():
+
+    """MNIST专用的数据变换"""
+    return torchvision.transforms.Compose([
+        torchvision.transforms.Resize((32, 32)),  # MNIST是28x28，调整到32x32以匹配原模型
+        torchvision.transforms.ToTensor(),
+        # torchvision.transforms.Lambda(lambda x: x.repeat(3, 1, 1)),  # 复制单通道为3通道
+        # torchvision.transforms.Grayscale(num_output_channels=3),  # 直接转换为3通道
+        To3Channels(),  # 使用自定义的转换类
+        RescaleChannels(),  # 将[0,1]映射到[-1,1]
+    ])
+
 def str2bool(v):
     """
     https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
@@ -69,7 +89,7 @@ def diffusion_defaults():
         num_timesteps=1000,
         schedule="linear",
         loss_type="l2",
-        use_labels=True,
+        use_labels=False,
 
         base_channels=128,
         channel_mults=(1, 2, 2, 2),

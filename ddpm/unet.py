@@ -5,6 +5,8 @@ import torch.nn.functional as F
 
 from torch.nn.modules.normalization import GroupNorm
 
+from ddpm import script_utils
+
 
 def get_norm(norm, num_channels, num_groups):
     if norm == "in":
@@ -384,3 +386,33 @@ class UNet(nn.Module):
             return x[:, :, ip:-ip, ip:-ip]
         else:
             return x
+
+
+if __name__ == '__main__':
+    # diffusion_defaults() 定义在 script_utils.py 中，包含：
+    #   - num_timesteps=1000          扩散总步数 T
+    #   - schedule="linear"           噪声调度类型
+    #   - loss_type="l2"              损失函数类型
+    #   - use_labels=False            是否使用类别条件
+    #   - base_channels=128           UNet 基础通道数
+    #   - channel_mults=(1, 2, 2, 2)  UNet 通道倍率
+    #   - num_res_blocks=2            每个 stage 残差块数
+    #   - time_emb_dim=512            时间嵌入维度
+    #   - norm="gn"                   归一化类型
+    #   - dropout=0.1                 Dropout 率
+    #   - activation="silu"           激活函数
+    #   - attention_resolutions=(1,)  应用注意力的分辨率
+    #   - ema_decay=0.9999            EMA 衰减率
+    #   - ema_update_rate=1           EMA 更新频率
+    test_net = UNet(
+        img_channels=3,
+        base_channels=64,
+        time_emb_dim=512,
+    )
+    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+    test_net.to(device)
+    print(test_net)
+
+    test_data = torch.randn(7, 3, 256, 256).to(device)
+    test_result = test_net(test_data, time=torch.tensor([20]).to(device))
+    print(test_result.shape)

@@ -135,27 +135,43 @@ def main():
         # batch_size 越大，梯度估计越稳定，但需要更多 GPU 显存
         batch_size = args.batch_size
 
-        # 创建 CIFAR-10 训练数据集对象
-        # CIFAR-10 包含 50,000 张 32×32 彩色训练图像和 10,000 张测试图像
-        # 分为 10 个类别：飞机、汽车、鸟、猫、鹿、狗、青蛙、马、船、卡车
-        train_dataset = datasets.CIFAR10(
-            root='./cifar_train/',       # 数据集下载/缓存的本地根目录
-            train=True,                 # True 表示加载训练集（50,000 张）
-            download=True,              # 如果本地不存在，自动从官网下载
-            transform=script_utils.get_transform(),  # 数据预处理变换
+        # # 创建 CIFAR-10 训练数据集对象
+        # # CIFAR-10 包含 50,000 张 32×32 彩色训练图像和 10,000 张测试图像
+        # # 分为 10 个类别：飞机、汽车、鸟、猫、鹿、狗、青蛙、马、船、卡车
+        # train_dataset = datasets.CIFAR10(
+        #     root='./cifar_train/',       # 数据集下载/缓存的本地根目录
+        #     train=True,                 # True 表示加载训练集（50,000 张）
+        #     download=True,              # 如果本地不存在，自动从官网下载
+        #     transform=script_utils.get_transform(),  # 数据预处理变换
+        # )
+        # # script_utils.get_transform() 返回的组合变换：
+        # #   1. ToTensor(): 将 PIL 图像 [0,255] 转为 Tensor [0,1]，形状 (C, H, W)
+        # #   2. RescaleChannels(): 将像素值从 [0, 1] 线性映射到 [-1, 1]，公式: 2*x - 1
+        # #      原因：DDPM 使用 tanh 激活和归一化输入，[-1,1] 范围更适合扩散过程
+        #
+        # # 创建 CIFAR-10 测试数据集对象（用于定期验证）
+        # test_dataset = datasets.CIFAR10(
+        #     root='./cifar_test',        # 测试集缓存目录（与训练集分开存储）
+        #     train=False,                # False 表示加载测试集（10,000 张）
+        #     download=True,              # 如果本地不存在，自动下载
+        #     transform=script_utils.get_transform(),  # 使用与训练集相同的预处理
+        # )
+        # 将原来的CIFAR10替换为MNIST
+        train_dataset = datasets.MNIST(
+            root='./mnist_train/',  # 修改数据目录
+            train=True,
+            download=True,
+            transform=script_utils.get_transform_mnist(),  # 使用新的变换函数
         )
-        # script_utils.get_transform() 返回的组合变换：
-        #   1. ToTensor(): 将 PIL 图像 [0,255] 转为 Tensor [0,1]，形状 (C, H, W)
-        #   2. RescaleChannels(): 将像素值从 [0, 1] 线性映射到 [-1, 1]，公式: 2*x - 1
-        #      原因：DDPM 使用 tanh 激活和归一化输入，[-1,1] 范围更适合扩散过程
 
-        # 创建 CIFAR-10 测试数据集对象（用于定期验证）
-        test_dataset = datasets.CIFAR10(
-            root='./cifar_test',        # 测试集缓存目录（与训练集分开存储）
-            train=False,                # False 表示加载测试集（10,000 张）
-            download=True,              # 如果本地不存在，自动下载
-            transform=script_utils.get_transform(),  # 使用与训练集相同的预处理
+        test_dataset = datasets.MNIST(
+            root='./mnist_test',
+            train=False,
+            download=True,
+            transform=script_utils.get_transform_mnist(),
         )
+
+
 
         # 创建训练集数据加载器
         # script_utils.cycle() 将 DataLoader 包装为无限循环迭代器，
@@ -199,6 +215,8 @@ def main():
             # y: 类别标签 Tensor，shape = (batch_size,)，值域 [0, 9]（CIFAR-10 有 10 个类别）
             # 注意：train_loader 被 cycle() 包装，所以永远不会抛出 StopIteration
             x, y = next(train_loader)
+
+            # print(x.shape)
 
             # 将图像和标签从 CPU 转移到目标设备（GPU/CPU）
             # 只有转移到设备上的张量才能参与模型的前向/反向计算
@@ -488,6 +506,7 @@ def create_argparser():
 
         # ===== 设备相关参数 =====
         device=device,               # 计算设备：自动检测（GPU 优先，无 GPU 则用 CPU）
+
     )
 
     # -------------------------------------------------------------------------

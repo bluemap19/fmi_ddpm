@@ -7,4 +7,6 @@ ddpm_env/
 /scripts/cifar_train/
 /scripts/wandb/
 scripts/cifar_train/cifar-10-python.tar.gz
-scripts/cifar_train/cifar-10-python.tar.gz
+/scripts/mnist_test/
+/scripts/mnist_train/
+/ddpm_testresult/

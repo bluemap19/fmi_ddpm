@@ -1,7 +1,6 @@
 import argparse
 import torch
 import torchvision
-
 from ddpm import script_utils
 
 
@@ -33,12 +32,19 @@ def main():
 
 def create_argparser():
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-    defaults = dict(num_images=10000, device=device)
+    defaults = dict(
+        num_images=100,
+        device=device,
+        schedule_low=1e-4,  # 线性调度的 β 起始值：0.0001,DDPM 原始论文使用 β_1 = 1e-4
+        schedule_high=0.02,  # 线性调度的 β 结束值：0.02
+        # DDPM 原始论文使用 β_T = 0.02
+        # 线性调度从低到高线性增加 β，意味着早期加噪慢、后期加噪快
+    )
     defaults.update(script_utils.diffusion_defaults())
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_path", type=str)
-    parser.add_argument("--save_dir", type=str)
+    parser.add_argument("--model_path", default=r'D:\GitHub\fmi_ddpm\ddpm_logs\DDPM_CIFAR_TEST-ddpm-2026-07-18-21-22-iteration-68000-model.pth', type=str)
+    parser.add_argument("--save_dir", default=r'D:\GitHub\fmi_ddpm\ddpm_testresult', type=str)
     script_utils.add_dict_to_argparser(parser, defaults)
     return parser
 
